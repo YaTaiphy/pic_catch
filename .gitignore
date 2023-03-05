@@ -1,0 +1,11 @@
+###### git更新方法
+# 我的做法是删除.git 文件夹，然后重新执行git init 以及重新关联远程仓库，然后再commit以及push，也可以如下操作
+
+# git rm -r --cached .
+
+# git add .
+# https://www.cnblogs.com/qlqwjy/p/7468892.html
+# git commit -m 'update .gitignore'
+
+/pic/*
+/__pycache__/
