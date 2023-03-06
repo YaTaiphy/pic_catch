@@ -17,6 +17,7 @@
 import os
 import json
 import sys
+import math
 
 from get_picture import save_pic
 
@@ -37,6 +38,8 @@ def json_read(abspath):
     count = 0
     may_exist = 0
     useful = 0
+    num404 = 0
+    numNoExist = 0
     
     lines = f.readlines()
     all_num = len(lines)
@@ -60,30 +63,43 @@ def json_read(abspath):
         
         pic_list = []
         img_count = 0
-        
+        num404sub = 0
+        numNoExistsub = 0
+        ### 注意！！！！注意！！！！！
+        # 在json文件的3394行，开始"piclists": NaN，而非"piclists": []，导致程序出错，哪个傻逼写的json文件
+        # 因此需要判断是否是nan，判断nan的方法如下
         ## 记录可能图片数量，到时候通过判断useful和may_exist的比例来判断是否存在爬取限制
-        if len(img_urls) != 0:
-            may_exist = may_exist + 1
-        
-        m = 0
-        for img_url in img_urls:
-            m = m + 1
-            out = "%d/%d"%(m, len(img_urls))
+        if not(isinstance(img_urls,float)):
+            if len(img_urls) != 0:
+                may_exist = may_exist + 1
             
-            sys.stdout.write("%s"%out.rjust(15))
-            
-            status, message = save_pic(img_url)
-            if status != 1:
+            m = 0
+            for img_url in img_urls:
+                m = m + 1
+                out = "%d/%d"%(m, len(img_urls))
+                
+                sys.stdout.write("%s"%out.rjust(15))
+                
+                status, message = save_pic(img_url)
+                if status != 1:
+                    if(status == -1):
+                        numNoExistsub = numNoExistsub + 1
+                    else:
+                        num404sub = num404sub + 1
+                    sys.stdout.write("\b"*15)
+                    sys.stdout.flush()
+                    continue
+                pic_list.append(message)
+                img_count = img_count + 1
+                
                 sys.stdout.write("\b"*15)
                 sys.stdout.flush()
-                continue
-            pic_list.append(message)
-            img_count = img_count + 1
-            
-            sys.stdout.write("\b"*15)
-            sys.stdout.flush()
             
         if img_count == 0:
+            if(num404sub > numNoExistsub):
+                num404 = num404 + 1
+            else:
+                numNoExist = numNoExist + 1  
             sys.stdout.write("\r")
             sys.stdout.flush()
             continue
@@ -104,7 +120,7 @@ def json_read(abspath):
     f.close()
     fd_json.close()
     
-    message = "total: %d, may_exist: %d, useful: %d\n"%(count, may_exist, useful)
+    message = "total: %d, may_exist: %d, useful: %d, num404: %d, numNoExist %d\n"%(count, may_exist, useful, num404, numNoExist)
     
     fd_txt = open(r'./select_' + save_name + '.txt','w+', encoding='utf-8')
     fd_txt.write(message)
@@ -124,6 +140,6 @@ if __name__ == '__main__':
         print("current file: %s"%(file))
         print("\texceeding")
         json_read(absPath)
-        print("current file: %s precess complete!"%(file))
+        print("current file: %s precess complete!\n"%(file))
     print("ALL Work Done!")
     

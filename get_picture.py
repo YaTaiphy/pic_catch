@@ -57,10 +57,13 @@ def save_pic(url):
     headers['Referer']= "https://weibo.com"
     req.adapters.DEFAULT_RETRIES = 5
     
+    ## img_valueble用于判断图片是否存在，0表示404，1表示存在，-1表示图片被删除
     img_valueble = 0
     ## 构建一个1*1的图片，用于比较图片分辨率
     img_max = Image.new('RGB', (1, 1))
     content_max = None
+    
+    
     
     m = 0
     for img in img_type:
@@ -82,7 +85,7 @@ def save_pic(url):
         
         ## 发送请求，如果无法连接到，则抛弃
         try:
-            response = req.get(concat_url, headers=headers, timeout=30)
+            response = req.get(concat_url, headers=headers, timeout=60)
         except:
             continue
         
@@ -96,6 +99,9 @@ def save_pic(url):
         if computSimilarity(image):
             if(img_valueble == 0):
                 img_valueble = -1
+            save_path = "./sample/" + name_part
+            with open(save_path, 'wb') as f:  # 以二进制写入文件保存
+                f.write(response.content)
             continue
         
         max_pre = img_max.size[0] * img_max.size[1]

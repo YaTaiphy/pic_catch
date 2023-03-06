@@ -1,7 +1,7 @@
 import os
 from PIL import Image
 import numpy as np
-
+import shutil
 
 # imageA = np.array(Image.open("./sample/1.jpg"))
 # imageB = np.array(Image.open("./sample/3.jpg"))
@@ -51,7 +51,7 @@ def computSimilarity(image):
     
     if(imageSampleNp.shape == imageNp.shape and imageSampleN.mode == imageN.mode):
         ed = np.sum(eucliDist(imageNp,imageSampleNp)/(imageNp.shape[0]*imageNp.shape[1])) + hist_similar(imageN.histogram(), imageSampleN.histogram())/10
-        if ed < 0.15:
+        if ed < 0.3:
             return True
         else:
             return False
@@ -75,3 +75,7 @@ if __name__ == "__main__":
     for file in os.listdir(pic_path):
         if computSimilarity(Image.open(os.path.join(pic_path, file))):
             print(file)
+            try:
+                shutil.move(os.path.join(pic_path, file), "./sample/")
+            except:
+                os.remove(os.path.join(pic_path, file))
