@@ -43,11 +43,13 @@ def computSimilarity(image):
     re_height = min(height, heightS)
     # if(width < 200 or height < 200):
     #     return True
-    
-    imageN = centerCrop(image, re_width, re_height)
-    imageNp = np.array(imageN)
-    imageSampleN = centerCrop(imageSample, re_width, re_height)
-    imageSampleNp = np.array(imageSampleN)
+    try:
+        imageN = centerCrop(image, re_width, re_height)
+        imageNp = np.array(imageN)
+        imageSampleN = centerCrop(imageSample, re_width, re_height)
+        imageSampleNp = np.array(imageSampleN)
+    except:
+            return False
     
     if(imageSampleNp.shape == imageNp.shape and imageSampleN.mode == imageN.mode):
         ed = np.sum(eucliDist(imageNp,imageSampleNp)/(imageNp.shape[0]*imageNp.shape[1])) + hist_similar(imageN.histogram(), imageSampleN.histogram())/10
